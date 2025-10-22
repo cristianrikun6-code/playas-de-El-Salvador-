@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Playas de El Salvador</title>
+
+<link rel="website icon" type="png"
+ href="images/images-ico.png">
+  <style>
+    :root{--accent:#0ea5a4;--bg:#f7f7fb;--card:#fff;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial;background:var(--bg);margin:0;color:#0f172a}
+    header{background:linear-gradient(90deg,#0ea5a4,#6366f1);color:white;padding:28px 16px}
+    h1{margin:0 0 6px;font-size:2rem}
+    p.lead{margin:0;color:rgba(255,255,255,0.9)}
+    main{max-width:1100px;margin:24px auto;padding:0 16px}
+    .controls{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+    input,select{padding:10px;border-radius:8px;border:1px solid #e6e7ee;font-size:1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:18px}
+    .card{background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.06);display:flex;flex-direction:column;gap:8px}
+    .card img{width:100%;height:160px;object-fit:cover;border-radius:8px}
+    .card-content{flex-grow:1}
+    .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:#eef7f7;color:#054740;font-weight:700;font-size:0.8rem}
+    .muted{color:var(--muted);font-size:0.95rem}
+    iframe{width:100%;height:180px;border:0;border-radius:8px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Playas de El Salvador</h1>
+    <p class="lead">Guía completa con todas las playas, sus características y localización en el mapa.</p>
+  </header>
+  <main>
+    <div class="controls">
+      <input type="search" id="q" placeholder="Buscar playa..." />
+      <select id="dept">
+        <option value="">Todos los departamentos</option>
+        <option>La Libertad</option>
+        <option>La Paz</option>
+        <option>Usulután</option>
+        <option>Sonsonate</option>
+        <option>Ahuachapán</option>
+        <option>San Vicente</option>
+        <option>La Unión</option>
+        <option>San Miguel</option>
+      </select>
+    </div>
+    <div class="grid" id="list"></div>
+  </main>
+  <script>
+    const playas = [
+      {name:"El Tunco", dept:"La Libertad", localidad:"Tamanique", desc:"Conocida por su ambiente surfista y vida nocturna.", lat:13.494, lon:-89.380, img:"https://i0.wp.com/passporterapp.com/es/blog/wp-content/uploads/2022/05/que-ver-en-el-tunco-scaled.jpg?fit=2560%2C1707&ssl=1"},
+      {name:"El Sunzal", dept:"La Libertad", localidad:"Tamanique", desc:"Olas ideales para surf profesional.", lat:13.496, lon:-89.383, img:"https://elsalvador.travel/system/wp-content/uploads/2023/09/sunzal-02.jpg"},
+      {name:"El Zonte", dept:"La Libertad", localidad:"Chiltiupán", desc:"Surf y comunidad internacional tranquila.", lat:13.509, lon:-89.432, img:"https://i0.wp.com/salvadoreantours.com/es/wp-content/uploads/sites/2/2019/09/villa_elsalvador3-2019.jpg?fit=2880%2C1077&ssl=1"},
+      {name:"San Blas", dept:"La Libertad", localidad:"La Libertad", desc:"Famosa por sus restaurantes de mariscos y ambiente familiar.", lat:13.483, lon:-89.322, img:"https://elsalvadorspot.com/wp-content/uploads/2024/10/playa-san-blas-el-salvador.jpg.webp"},
+      {name:"La Bocana", dept:"La Libertad", localidad:"La Libertad", desc:"Lugar de surf y desembocadura de río con olas consistentes.", lat:13.486, lon:-89.322, img:"https://www.sunzal.com/wp-content/uploads/2016/09/La-Bocana-2.jpg"},
+      {name:"El Palmarcito", dept:"La Libertad", localidad:"Tamanique", desc:"Pequeña playa con ambiente tranquilo y natural.", lat:13.510, lon:-89.415, img:"https://elsalvador.travel/system/wp-content/uploads/2024/07/palmarcito-01.jpg"},
+      {name:"Los Cóbanos", dept:"Sonsonate", localidad:"Acajutla", desc:"Arrecifes y buceo con corales.", lat:13.526, lon:-89.808, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFBdAaN24GGnUhv2aLd42C99q-ke0-0w6uhQ&s"},
+      {name:"Barra de Santiago", dept:"Ahuachapán", localidad:"Jujutla", desc:"Manglares, fauna y paseos en lancha.", lat:13.742, lon:-90.032, img:"https://turismo.sv/wp-content/uploads/2019/06/barra-de-santiago-5.jpg"},
+      {name:"Metalío", dept:"Sonsonate", localidad:"Acajutla", desc:"Aguas tranquilas y restaurantes costeros.", lat:13.545, lon:-89.777, img:"https://elsalvador.travel/system/wp-content/uploads/2024/07/cobanos-02.jpg"},
+      {name:"Acajutla", dept:"Sonsonate", localidad:"Acajutla", desc:"Puerto principal con playa y malecón.", lat:13.592, lon:-89.833, img:"https://elsalvador.travel/system/wp-content/uploads/2024/08/acajutla-01.jpg"},
+      {name:"Punta Mango", dept:"Usulután", localidad:"Jucuarán", desc:"Playa remota y de olas grandes para surfistas expertos.", lat:13.211, lon:-88.104, img:"https://elsalvador.travel/system/wp-content/uploads/2022/12/DestinationPuntaMangoSM01.jpg"},
+      {name:"El Espino", dept:"Usulután", localidad:"Jiquilisco", desc:"Arena fina, mar tranquilo y turismo local.", lat:13.206, lon:-88.386, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi0hK3ajR4sUQ04aJm2wjpmWxY2p0VhGxgag&s"},
+      {name:"El Cuco", dept:"San Miguel", localidad:"Chirilagua", desc:"Amplia playa para nadar y descansar.", lat:13.176, lon:-88.088, img:"https://turismo.sv/wp-content/uploads/2019/06/el-cuco-3.jpg"},
+      {name:"Las Flores", dept:"San Miguel", localidad:"Chirilagua", desc:"Famosa por el surf y hermosos paisajes.", lat:13.166, lon:-88.088, img:"https://elsalvador.travel/system/wp-content/uploads/2022/12/DestinationLasFlores0.jpg"},
+      {name:"Maculis", dept:"La Unión", localidad:"Conchagua", desc:"Playa virgen cercana al Golfo de Fonseca.", lat:13.289, lon:-87.842, img:"https://www.laprensagrafica.com/__export/1736273386150/sites/prensagrafica/img/2025/01/07/playa_maculis_1.jpeg_423682103.jpeg"},
+      {name:"El Tamarindo", dept:"La Unión", localidad:"Conchagua", desc:"Bahía calmada y panoramas al Golfo de Fonseca.", lat:13.267, lon:-87.836, img:"https://elsalvador.travel/system/wp-content/uploads/2024/07/el-tamarindo-01.jpg"},
+      {name:"Playitas", dept:"Usulután", localidad:"Jiquilisco", desc:"Playas pequeñas y escondidas ideales para relajarse.", lat:13.230, lon:-88.395, img:"https://ingridlofts.com/wp-content/uploads/2023/05/122241233_3840461219307099_7986821203922307209_n.jpg"},
+      {name:"Bahía de Jiquilisco", dept:"Usulután", localidad:"Jiquilisco", desc:"Zona natural protegida con manglares y fauna.", lat:13.283, lon:-88.550, img:"https://lh4.googleusercontent.com/-rkriUk1tbS4/UvRUTpzRrzI/AAAAAAAADbg/HjshjIupBl4/s480/bahia-de-jiquilisco.jpg"},
+      {name:"Isla de Tasajera", dept:"La Paz", localidad:"San Luis La Herradura", desc:"Isla paradisíaca accesible en lancha.", lat:13.337, lon:-88.947, img:"https://ts2.mm.bing.net/th?q=isla+tasajera"},
+      {name:"Costa del Sol", dept:"La Paz", localidad:"San Luis La Herradura", desc:"Playa extensa con hoteles y restaurantes.", lat:13.332, lon:-88.941, img:"https://media.tacdn.com/media/attractions-splice-spp-674x446/07/a6/f1/49.jpg"},
+      {name:"San Marcelino", dept:"La Paz", localidad:"San Luis La Herradura", desc:"Parte de la Costa del Sol, ideal para nadar.", lat:13.323, lon:-88.942, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTZ4C6bR1fmyO9ZJz39UVNHN28OxbNFD8O35w&s"},
+      {name:"Los Blancos", dept:"La Paz", localidad:"San Luis La Herradura", desc:"Zona tranquila con manglares cercanos.", lat:13.342, lon:-88.958, img:"https://elsalvador.travel/system/wp-content/uploads/2020/09/Costa-del-Sol-10032022-ISTU-org_b94c38c2221a4f34_1645032652000.jpg"},
+      {name:"El Majahual", dept:"La Libertad", localidad:"La Libertad", desc:"Muy visitada por locales, ideal para comer mariscos.", lat:13.485, lon:-89.321, img:"https://images.mnstatic.com/c7/d9/c7d9258f3dcf42d0db17b45ad96c0baa.jpg"},
+      {name:"Punta Roca", dept:"La Libertad", localidad:"La Libertad", desc:"Reconocida internacionalmente por el surf.", lat:13.486, lon:-89.324, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhChz7rBL0-XwkqJmJJikGm1Db3JvowVUW8w&s"},
+      {name:"El Obispo", dept:"La Libertad", localidad:"La Libertad", desc:"Playita local cerca del puerto.", lat:13.483, lon:-89.324, img:"https://elsalvador.travel/system/wp-content/uploads/2020/09/El-Obispo-1-2.jpg"},
+      {name:"Las Tunas", dept:"La Unión", localidad:"Conchagua", desc:"Playas de arena oscura y aguas cálidas.", lat:13.297, lon:-87.846, img:"https://elsalvador.travel/system/wp-content/uploads/2020/01/5f740e7f-34d5-4b5c-8835-2cce01dce20b.jpg"},
+      {name:"El Esterón", dept:"La Unión", localidad:"Intipucá", desc:"Playa larga, tranquila y con manglares.", lat:13.232, lon:-88.031, img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfXLECq1qFMa0XaPsj9uBuTY41BfNqQjXL3w&s"},
+      {name:"El Jaguey", dept:"La Unión", localidad:"Conchagua", desc:"Punto de partida para explorar el Golfo de Fonseca.", lat:13.266, lon:-87.841, img:"https://elsalvador.travel/system/wp-content/uploads/2023/01/Punta-El-Jaguey-02.jpg"},
+      {name:"Las Hojas", dept:"La Paz", localidad:"San Pedro Masahuat", desc:"Balneario y playa popular para familias.", lat:13.401, lon:-89.010, img:"https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0b/72/b9/0e/las-hojas-resort-club.jpg?w=900&h=500&s=1"},
+      {name:"El Amatal", dept:"La Paz", localidad:"San Luis Talpa", desc:"Playa tranquila cercana al aeropuerto.", lat:13.427, lon:-89.043, img:"https://siempretur.com/media/com_jbusinessdirectory/pictures/companies/0/cropped-1623101417.jpeg"}
+    ];
+
+    const list=document.getElementById('list');
+    const q=document.getElementById('q');
+    const dept=document.getElementById('dept');
+
+    function render(items){
+      list.innerHTML='';
+      items.forEach(p=>{
+        const mapURL=`https://www.google.com/maps?q=${p.lat},${p.lon}`;
+        const iframe=`<iframe loading="lazy" src="https://www.google.com/maps?q=${p.lat},${p.lon}&output=embed"></iframe>`;
+        const div=document.createElement('div');
+        div.className='card';
+        div.innerHTML=`
+          <img src="${p.img}" alt="Playa ${p.name}">
+          <div class="card-content">
+            <h3>${p.name}</h3>
+            <div class="badge">${p.dept}</div>
+            <p class="muted">Localidad: ${p.localidad}</p>
+            <p>${p.desc}</p>
+            <a href="${mapURL}" target="_blank">Ver en Google Maps</a>
+            ${iframe}
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function filter(){
+      const query=q.value.toLowerCase();
+      const d=dept.value;
+      const filtered=playas.filter(p=>
+        (p.name.toLowerCase().includes(query)||p.desc.toLowerCase().includes(query)) &&
+        (d===''||p.dept===d)
+      );
+      render(filtered);
+    }
+    q.addEventListener('input',filter);
+    dept.addEventListener('change',filter);
+    render(playas);
+  </script>
+</body>
+</html>
+
+
